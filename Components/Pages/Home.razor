@@ -1,0 +1,159 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Reflection
+
+<PageTitle>Home</PageTitle>
+    
+<FluentHeader>
+<h1>Fluent Design Test</h1>
+</FluentHeader>
+
+<FluentBodyContent style="flex-direction: column;">
+
+    <div style="width:80vw">
+    <FluentCalendar DayFormat="DayFormat.TwoDigit" Value="@SelectedDate" ValueChanged="@((e)=>SelectedDate = e!.Value)" PickerMonthChanged="@(async(e)=>await GetMonthHolidayInfo(e.Year,e.Month))"  >
+        <DaysTemplate>
+            @if (!context.IsInactive && Holidays!.Contains(context.Date.Day)) {
+                <div style="background-color:red;color:white;border-style:solid;border-width:1px;border-radius:15px;font-weight:bold">
+                    @context.DayNumber
+                </div>
+            } else if (!context.IsInactive && context.Date.DayOfWeek == DayOfWeek.Sunday) {
+                <div style="color:red">
+                    @context.DayNumber
+                </div>
+            } else if (!context.IsInactive && context.Date.DayOfWeek == DayOfWeek.Saturday) {
+                <div style="color:blue">
+                    @context.DayNumber
+                </div>
+            } else {
+                @context.DayNumber
+            }
+        </DaysTemplate>
+    </FluentCalendar>
+    <br/>
+    <span>Selected Date:</span><span>@(SelectedDate == null ? "" : SelectedDate.Value.ToString("yyyy/MM/dd"))</span>
+    <br/>
+    <FluentDatePicker  Value="@SelectedDate" ValueChanged="@((e)=>SelectedDate = e!.Value)"></FluentDatePicker>
+
+    <br/>
+    Horizontal Alignment:<FluentSelect AriaLabel="Horizontal Alignment" Items="@(Enum.GetValues<HorizontalAlignment>())" @bind-SelectedOption="halign"/>&nbsp;
+    Vertical Alignment:<FluentSelect AriaLabel="Vertical Alignment" Items="@(Enum.GetValues<VerticalAlignment>())" @bind-SelectedOption="valign"/>
+    <br/>
+    Stack Vertical<br/>
+    <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="@valign" HorizontalAlignment="@halign" 
+        style="height:200px;width:500px;border-style:dotted;border-width:1px;border-color:darkgray">
+        <div class="item1"><div>Hello</div></div>
+        <div class="item2"><div>World</div></div>
+    </FluentStack>
+    Stack Horizontal<br/>
+    <FluentStack Orientation="Orientation.Horizontal"  VerticalAlignment="@valign" HorizontalAlignment="@halign"
+        style="height:200px;width:500px;border-style:dotted;border-width:1px;border-color:darkgray">
+        <div class="item1"><div>Hello</div></div>
+        <div class="item2"><div>World</div></div>
+    </FluentStack>
+    <br/>
+    </div>
+    Food &amp; Drink
+    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" Width="60%">
+    @{
+        var ass = Assembly.Load("Microsoft.FluentUI.AspNetCore.Components.Emoji");
+        var food = ass.GetType("Microsoft.FluentUI.AspNetCore.Components.Emojis+FoodDrink");
+        var color = food!.GetNestedType("Color");
+        var def = color!.GetNestedType("Default");
+        var ems = def!.GetNestedTypes();
+        foreach(var em in ems) {
+            <div style="display:flex;justify-content:center;flex-direction:column">
+            @{
+                dynamic? eee = Activator.CreateInstance(em);
+                string ename = eee!.GetType().ToString();
+                ename = ename.Substring(ename.LastIndexOf("+")+1);
+            }
+            <div style="display:flex;justify-content:center;width:100px;height:60px;">@(eee!.ToMarkup("50px"))</div>
+            <div style="width:100px;text-align:center">@ename</div>
+            </div>
+        }
+    }
+    </FluentStack><hr/>
+    Animals &amp; Nature
+    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" Width="60%">
+    @{
+        var ass = Assembly.Load("Microsoft.FluentUI.AspNetCore.Components.Emoji");
+        var food = ass.GetType("Microsoft.FluentUI.AspNetCore.Components.Emojis+AnimalsNature");
+        var color = food!.GetNestedType("Color");
+        var def = color!.GetNestedType("Default");
+        var ems = def!.GetNestedTypes();
+        foreach(var em in ems) {
+            <div style="display:flex;justify-content:center;flex-direction:column">
+            @{
+                dynamic? eee = Activator.CreateInstance(em);
+                string ename = eee!.GetType().ToString();
+                ename = ename.Substring(ename.LastIndexOf("+")+1);
+            }
+            <div style="display:flex;justify-content:center;width:100px;height:60px;">@(eee!.ToMarkup("50px"))</div>
+            <div style="width:100px;text-align:center">@ename</div>
+            </div>
+        }
+    }
+    </FluentStack><br/>
+    Objects
+    <FluentStack Orientation="Orientation.Horizontal" Wrap="true" Width="60%">
+    @{
+        var ass = Assembly.Load("Microsoft.FluentUI.AspNetCore.Components.Emoji");
+        var food = ass.GetType("Microsoft.FluentUI.AspNetCore.Components.Emojis+Objects");
+        var color = food!.GetNestedType("Color");
+        var def = color!.GetNestedType("Default");
+        var ems = def!.GetNestedTypes();
+        foreach(var em in ems) {
+            <div style="display:flex;justify-content:center;flex-direction:column">
+            @{
+                dynamic? eee = Activator.CreateInstance(em);
+                string ename = eee!.GetType().ToString();
+                ename = ename.Substring(ename.LastIndexOf("+")+1);
+            }
+            <div style="display:flex;justify-content:center;width:100px;height:60px;">@(eee!.ToMarkup("50px"))</div>
+            <div style="width:100px;text-align:center">@ename</div>
+            </div>
+        }
+    }
+    </FluentStack><br/>
+</FluentBodyContent>
+<FluentFooter>
+    <span>@(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"))</span>
+</FluentFooter>
+@code {
+    protected DateTime? SelectedDate;
+    protected List<int>? Holidays;
+    private int CurMonth;
+    protected VerticalAlignment valign;
+    protected HorizontalAlignment halign;
+    protected override async Task OnInitializedAsync() {
+        base.OnInitialized();
+        CurMonth = 0;
+        await GetMonthHolidayInfo(DateTime.Now.Year,DateTime.Now.Month);
+    }
+    protected async Task<bool> IsHoliday(DateOnly dt) {
+        HttpClient cli = new HttpClient();
+        string holiday = await cli.GetStringAsync($"https://s-proj.com/utils/checkHoliday.php?kind=ph&date={dt.ToString("yyyyMMdd")}");
+        if (holiday == "holiday") return true;
+        return false;
+    }
+    protected async Task GetMonthHolidayInfo(int year, int month) {
+        if (CurMonth != month) {
+            Holidays = new();
+            int NextMonth = month+1;
+            if (month == 12) {
+                NextMonth = 1;
+                year++;
+            }
+            int LastDay = new DateOnly(year,NextMonth,1).AddDays(-1).Day;
+            for(int i=1; i <= LastDay; i++) {
+                bool stat = await IsHoliday(new DateOnly(year,month,i));
+                if (stat) {
+                    Holidays.Add(i);
+                }
+            }
+            CurMonth = month;
+        }
+    }
+}
